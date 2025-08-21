@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+
+# Node/TypeScript
+node_modules/
+*.tsbuildinfo
+coverage/
+
+# OS/Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Project-specific
+medquery.db
+static/js/*.map
+out/

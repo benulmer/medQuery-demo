@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "iq-svc-remote": {
+      "url": "http://10.206.36.210:8000/mcp",
+      "headers": {
+        "Accept": "text/event-stream",
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}
+

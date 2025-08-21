@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedQuery AI - VitaSense Health Solutions</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- User Selection Modal -->
+    <div id="userModal" class="modal active">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <h1>MedQuery AI</h1>
+                </div>
+                <p class="subtitle">VitaSense Health Solutions</p>
+                <p class="description">An intelligent healthcare data assistant with role-based access control</p>
+            </div>
+            <div class="modal-body">
+                <h3>Select Your Role</h3>
+                <div id="userList" class="user-list">
+                    <!-- Users will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Interface -->
+    <div class="container">
+        <div id="chatInterface" class="chat-interface">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>MedQuery AI</span>
+                </div>
+                <p class="subtitle">VitaSense Health Solutions</p>
+                <button id="newChatBtn" class="new-chat-btn">
+                    <i class="fas fa-plus"></i>
+                    New Chat
+                </button>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Select User</div>
+                    <div class="user-role" id="userRole">No Role</div>
+                </div>
+                <button id="switchUserBtn" class="switch-user-btn">
+                    <i class="fas fa-user-cog"></i>
+                </button>
+            </div>
+
+            <div class="permissions-section">
+                <h4><i class="fas fa-shield-alt"></i> Permissions</h4>
+                <ul id="permissionsList" class="permissions-list">
+                    <li>Select a user to view permissions</li>
+                </ul>
+            </div>
+
+            <div class="examples-section">
+                <h4><i class="fas fa-lightbulb"></i> Example Queries</h4>
+                <div id="exampleQueries" class="example-queries">
+                    <button class="example-btn">Summarize Jane Smith's health history</button>
+                    <button class="example-btn">Find patients with Type 2 Diabetes</button>
+                    <button class="example-btn">What medications is patient P001 taking?</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2>Healthcare Data Assistant</h2>
+                <div class="status-indicator">
+                    <div class="status-dot online"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <div class="welcome-content">
+                        <i class="fas fa-robot"></i>
+                        <h3>Welcome to MedQuery AI</h3>
+                        <p>I'm your intelligent healthcare data assistant. I can help you:</p>
+                        <ul>
+                            <li>🔍 Find patients by specific criteria</li>
+                            <li>📋 Summarize patient medical histories</li>
+                            <li>📊 Generate population statistics</li>
+                            <li>🔒 Ensure role-based data access</li>
+                        </ul>
+                        <p class="security-note">
+                            <i class="fas fa-shield-alt"></i>
+                            Powered by Trust3 for enhanced security and compliance
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="input-container">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Ask me about patient data, medical histories, or population statistics..."
+                        rows="1"></textarea>
+                    <button id="sendBtn" class="send-btn" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="input-footer">
+                    <span class="disclaimer">
+                        <i class="fas fa-info-circle"></i>
+                        All queries are subject to role-based access control and HIPAA compliance
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-heartbeat fa-beat"></i>
+            <p>Processing your query...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
