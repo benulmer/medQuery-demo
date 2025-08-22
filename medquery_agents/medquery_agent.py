@@ -45,25 +45,20 @@ class MedQueryAgent:
             print("📋 Rule-Based Mode: Ollama not available")
     
     async def process_query(self, query: str) -> QueryResult:
-        """Process a query using either AI or rule-based approach"""
+        """Always process via AI (OpenAI GPT-4 when configured)."""
         try:
-            # Prefer deterministic/rule-based for known categories (enables MCP path)
-            category = self._categorize_query(query)
-            if category in ("aggregate_stats", "individual_patient", "help"):
-                return await self._process_query_rule_based(query)
-
-            # Fall back to AI for general queries
             if self.use_ai and self.ai_processor:
-                try:
-                    return await self.ai_processor.process_query(query, self.context.user, self.context.patients)
-                except Exception:
-                    # If AI fails, try rule-based as a safe fallback
-                    return await self._process_query_rule_based(query)
-            return await self._process_query_rule_based(query)
+                return await self.ai_processor.process_query(query, self.context.user, self.context.patients)
+            return QueryResult(
+                success=False,
+                message="OpenAI is not configured. Set OPENAI_API_KEY and try again.",
+                access_level=self.context.user.role,
+                redacted_fields=[]
+            )
         except Exception as e:
             return QueryResult(
                 success=False,
-                message=f"Error processing query: {str(e)}",
+                message=f"AI error: {str(e)}",
                 access_level=self.context.user.role,
                 redacted_fields=[]
             )
@@ -282,6 +277,7 @@ class MedQueryAgent:
         ]
 
         # Detect query type and parameters
+
         if "percentage" in query_lower and "metformin" in query_lower:
             age_filter = None
             if "under 40" in query_lower or "< 40" in query_lower:

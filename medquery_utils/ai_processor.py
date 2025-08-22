@@ -356,7 +356,7 @@ Respond directly and professionally with the requested information based on your
             config = AIConfig(
                 provider='openai',
                 api_key=openai_key,
-                model=os.getenv('OPENAI_MODEL', 'gpt-3.5-turbo'),
+                model=os.getenv('OPENAI_MODEL', 'gpt-4'),
                 max_tokens=int(os.getenv('OPENAI_MAX_TOKENS', '1000')),
                 temperature=float(os.getenv('OPENAI_TEMPERATURE', '0.1')),
                 use_trust3=os.getenv('USE_TRUST3', 'true').lower() == 'true',

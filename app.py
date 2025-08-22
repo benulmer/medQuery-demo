@@ -35,7 +35,7 @@ def load_patient_data():
     global patient_data
     import json
     
-    data_file = os.path.join(os.getcwd(), 'data', 'mock_patient_data.json')
+    data_file = os.path.join(os.getcwd(), 'Data', 'mock_patient_data.json')
     try:
         with open(data_file, 'r') as f:
             patient_data = json.load(f)
@@ -187,7 +187,8 @@ if __name__ == '__main__':
     
     if initialize_agent():
         print("🚀 MedQuery AI is ready!")
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        # Disable debug reloader to preserve environment variables and avoid double-spawn
+        app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5000)
     else:
         print("❌ Failed to initialize MedQuery AI")
         sys.exit(1)

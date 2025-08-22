@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from collections import Counter
-from utils.access_control import PatientData, AccessControl, UserRole
+from medquery_utils.access_control import PatientData, AccessControl, UserRole
 
 
 @dataclass

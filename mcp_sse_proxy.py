@@ -46,6 +46,21 @@ def _inject_headers(incoming: Dict[str, str]) -> Dict[str, str]:
     return headers
 
 
+def _sanitize_response_headers(upstream: Dict[str, str]) -> Dict[str, str]:
+    """Remove hop-by-hop and conflicting headers for Flask streaming."""
+    hop_by_hop = {
+        "connection",
+        "proxy-connection",
+        "keep-alive",
+        "transfer-encoding",
+        "content-length",
+        "upgrade",
+        "te",
+        "trailer",
+    }
+    return {k: v for k, v in upstream.items() if k.lower() not in hop_by_hop}
+
+
 @app.route("/mcp", methods=["GET", "POST"])
 def mcp_root() -> Response:
     # Pass-through root to remote; many clients probe this
@@ -55,19 +70,19 @@ def mcp_root() -> Response:
         r = requests.get(url, headers=headers, stream=True)
     else:
         r = requests.post(url, headers=headers, data=request.get_data(), stream=True)
-    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=dict(r.headers))
+    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=_sanitize_response_headers(dict(r.headers)))
 
 
 @app.route("/mcp/health", methods=["GET"])
 def health() -> Response:
     r = requests.get(f"{REMOTE_URL}/health", headers=_inject_headers(dict(request.headers)), stream=True)
-    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=dict(r.headers))
+    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=_sanitize_response_headers(dict(r.headers)))
 
 
 @app.route("/mcp/tools", methods=["GET"])
 def tools() -> Response:
     r = requests.get(f"{REMOTE_URL}/tools", headers=_inject_headers(dict(request.headers)), stream=True)
-    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=dict(r.headers))
+    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=_sanitize_response_headers(dict(r.headers)))
 
 
 @app.route("/mcp/<path:path>", methods=["GET", "POST"])
@@ -78,7 +93,7 @@ def passthrough(path: str) -> Response:
         r = requests.get(url, headers=headers, stream=True)
     else:
         r = requests.post(url, headers=headers, data=request.get_data(), stream=True)
-    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=dict(r.headers))
+    return Response(r.iter_content(chunk_size=None), status=r.status_code, headers=_sanitize_response_headers(dict(r.headers)))
 
 
 if __name__ == "__main__":
