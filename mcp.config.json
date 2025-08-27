@@ -6,7 +6,15 @@
         "Accept": "text/event-stream",
         "Content-Type": "application/json"
       }
+    },
+    "iq-prod": {
+      "url": "http://10.206.36.210:8000/mcp/",
+      "headers": {
+        "Accept": "application/json, text/event-stream",
+        "Content-Type": "application/json"
+      }
     }
-  }
+  },
+  "defaultServer": "iq-prod"
 }
 
