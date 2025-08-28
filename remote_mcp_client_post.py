@@ -73,10 +73,12 @@ async def list_tools() -> List[str]:
     timeout = aiohttp.ClientTimeout(total=15)
     async with aiohttp.ClientSession(timeout=timeout) as http:
         sid = await fetch_sid(http)
-        await mcp_post(http, sid, "initialize", INIT_PARAMS)
+        init_res = await mcp_post(http, sid, "initialize", INIT_PARAMS)
+        print("init response:", init_res)
         # Try multiple parameter shapes to maximize compatibility
         for params in CANDIDATES:
             res = await mcp_post(http, sid, "tools/list", params)
+            print("tools/list params=", params, "->", res)
             tools = res.get("result", {}).get("tools", [])
             if tools:
                 return [t.get("name") for t in tools if isinstance(t, dict) and t.get("name")]
