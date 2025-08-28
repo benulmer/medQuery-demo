@@ -15,7 +15,7 @@ class FastMCPBridge:
     - sse: connect to remote SSE/HTTP endpoint
     """
 
-    def __init__(self, mode: str = "stdio", command: Optional[List[str]] = None, url: Optional[str] = None, headers: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, mode: str = "sse", command: Optional[List[str]] = None, url: Optional[str] = None, headers: Optional[Dict[str, str]] = None) -> None:
         self.mode = (mode or "stdio").lower()
         self.command = command
         self.url = url
@@ -23,7 +23,7 @@ class FastMCPBridge:
 
     @staticmethod
     def initialize_from_env() -> Optional["FastMCPBridge"]:
-        mode = os.getenv("FASTMCP_MODE", "stdio").lower()
+        mode = os.getenv("FASTMCP_MODE", "sse").lower()
         if mode == "stdio":
             cmd_str = os.getenv("FASTMCP_COMMAND", "mcp_stdio_server.py").strip()
             # naive split is fine for simple commands
