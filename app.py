@@ -29,6 +29,9 @@ CORS(app)
 medquery_agent = None
 patient_data = []
 patient_repo: PatientRepository = None
+MCP_ENABLED_DEFAULT = True
+def is_mcp_enabled():
+    return os.getenv('USE_MCP', 'true').lower() == 'true'
 
 def load_patient_data():
     """Load patient data from JSON file"""
@@ -181,8 +184,17 @@ def health():
         "patient_records": len(patient_data),
         "db_records": db_count,
         "trust3_enabled": hasattr(medquery_agent, 'ai_processor') and 
-                         medquery_agent.ai_processor is not None if medquery_agent else False
+                         medquery_agent.ai_processor is not None if medquery_agent else False,
+        "mcp_enabled": is_mcp_enabled()
     })
+
+@app.route('/api/mcp/toggle', methods=['POST'])
+def mcp_toggle():
+    data = request.get_json() or {}
+    enabled = bool(data.get('enabled', True))
+    # Persist in process env for current runtime
+    os.environ['USE_MCP'] = 'true' if enabled else 'false'
+    return jsonify({"success": True, "mcp_enabled": is_mcp_enabled()})
 
 if __name__ == '__main__':
     print("🏥 Starting MedQuery AI Web Interface...")

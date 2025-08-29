@@ -11,6 +11,7 @@ class MedQueryApp {
         this.bindEvents();
         this.loadUsers();
         this.setupTextarea();
+        this.syncMcpToggle();
     }
 
     bindEvents() {
@@ -58,6 +59,41 @@ class MedQueryApp {
             this.updateSendButton();
             this.autoResize();
         });
+
+        // MCP toggle
+        const mcpToggle = document.getElementById('mcpToggle');
+        if (mcpToggle) {
+            mcpToggle.addEventListener('change', async () => {
+                try {
+                    const enabled = mcpToggle.checked;
+                    const res = await fetch('/api/mcp/toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ enabled })
+                    });
+                    const data = await res.json();
+                    const status = document.getElementById('mcpStatus');
+                    status.textContent = data.mcp_enabled ? 'MCP is ON' : 'MCP is OFF (OpenAI only)';
+                } catch (e) {
+                    console.error('Failed to toggle MCP', e);
+                }
+            });
+        }
+    }
+
+    async syncMcpToggle() {
+        try {
+            const res = await fetch('/api/health');
+            const data = await res.json();
+            const mcpToggle = document.getElementById('mcpToggle');
+            const status = document.getElementById('mcpStatus');
+            if (mcpToggle && data) {
+                mcpToggle.checked = !!data.mcp_enabled;
+                if (status) status.textContent = data.mcp_enabled ? 'MCP is ON' : 'MCP is OFF (OpenAI only)';
+            }
+        } catch (e) {
+            console.error('Failed to sync MCP status', e);
+        }
     }
 
     setupTextarea() {

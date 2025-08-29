@@ -1,4 +1,5 @@
 import re
+import os
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from medquery_utils.access_control import PatientData, User, UserRole, AccessControl
@@ -46,8 +47,9 @@ class MedQueryAgent:
     
     async def process_query(self, query: str) -> QueryResult:
         """Process via remote MCP first (if available); fall back to OpenAI GPT-4."""
-        # 1) Try MCP tool if bridge is available
-        if self.fastmcp is not None:
+        # 1) Try MCP tool if bridge is available and MCP is enabled
+        mcp_enabled = os.getenv('USE_MCP', 'true').lower() == 'true'
+        if mcp_enabled and self.fastmcp is not None:
             try:
                 res = await self.fastmcp.call_tool('query_iq_service', {'query': query})
                 # Best-effort extraction of text
