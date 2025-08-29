@@ -57,6 +57,7 @@ class MedQueryAgent:
                     sc = getattr(res, 'structuredContent', None)
                     if isinstance(sc, dict):
                         text = sc.get('raw') or ""
+                        sql_text = sc.get('sql') if isinstance(sc.get('sql'), str) else None
                     if not text:
                         content_list = getattr(res, 'content', None)
                         if isinstance(content_list, list) and content_list:
@@ -83,7 +84,8 @@ class MedQueryAgent:
                     message=text,
                     access_level=self.context.user.role,
                     redacted_fields=[],
-                    source="mcp"
+                    source="mcp",
+                    sql=locals().get('sql_text')
                 )
             except Exception:
                 # Ignore MCP errors and fall back to AI

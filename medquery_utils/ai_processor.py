@@ -44,6 +44,7 @@ class QueryResult:
     access_level: UserRole
     redacted_fields: List[str] = None
     source: str | None = None
+    sql: str | None = None
 
 
 class AIProcessor:

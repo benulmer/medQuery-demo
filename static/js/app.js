@@ -236,7 +236,9 @@ class MedQueryApp {
                     success: data.success,
                     accessLevel: data.access_level,
                     redactedFields: data.redacted_fields,
-                    timestamp: data.timestamp
+                    timestamp: data.timestamp,
+                    source: data.source,
+                    sql: data.sql
                 });
             } else {
                 this.addMessage(data.error || 'An error occurred', 'assistant', {
@@ -291,15 +293,37 @@ class MedQueryApp {
             }
         }
 
+        const sqlSection = (metadata.sql && metadata.sql.length > 0) ? `
+            <div class="sql-toggle">
+                <button class="toggle-sql-btn">Show SQL</button>
+                <pre class="sql-block" style="display:none;">${metadata.sql}</pre>
+            </div>
+        ` : '';
+
+        const sourceBadge = metadata.source ? `<span class="source-badge">${metadata.source.toUpperCase()}</span>` : '';
+
         messageDiv.innerHTML = `
             <div class="message-content">
                 ${headerContent}
                 <div class="message-text">${this.formatMessage(text)}</div>
+                ${sqlSection}
                 ${footerContent}
+                <div class="message-meta">${sourceBadge}</div>
             </div>
         `;
 
         chatMessages.appendChild(messageDiv);
+
+        // Wire up toggle if present
+        const toggleBtn = messageDiv.querySelector('.toggle-sql-btn');
+        const sqlBlock = messageDiv.querySelector('.sql-block');
+        if (toggleBtn && sqlBlock) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = sqlBlock.style.display === 'none';
+                sqlBlock.style.display = isHidden ? 'block' : 'none';
+                toggleBtn.textContent = isHidden ? 'Hide SQL' : 'Show SQL';
+            });
+        }
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
         // Store in history

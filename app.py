@@ -150,6 +150,7 @@ def chat():
             "access_level": result.access_level.value,
             "redacted_fields": result.redacted_fields or [],
             "source": getattr(result, 'source', None),
+            "sql": getattr(result, 'sql', None),
             "timestamp": datetime.now().isoformat()
         }
         
