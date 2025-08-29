@@ -82,7 +82,8 @@ class MedQueryAgent:
                     success=True,
                     message=text,
                     access_level=self.context.user.role,
-                    redacted_fields=[]
+                    redacted_fields=[],
+                    source="mcp"
                 )
             except Exception:
                 # Ignore MCP errors and fall back to AI
@@ -91,19 +92,25 @@ class MedQueryAgent:
         # 2) Fallback: OpenAI path (preferred) or error if unavailable
         try:
             if self.use_ai and self.ai_processor:
-                return await self.ai_processor.process_query(query, self.context.user, self.context.patients)
+                qr = await self.ai_processor.process_query(query, self.context.user, self.context.patients)
+                # ensure source is set by AIProcessor, but default if missing
+                if not getattr(qr, 'source', None):
+                    qr.source = "openai"
+                return qr
             return QueryResult(
                 success=False,
                 message="OpenAI is not configured. Set OPENAI_API_KEY and try again.",
                 access_level=self.context.user.role,
-                redacted_fields=[]
+                redacted_fields=[],
+                source="openai"
             )
         except Exception as e:
             return QueryResult(
                 success=False,
                 message=f"AI error: {str(e)}",
                 access_level=self.context.user.role,
-                redacted_fields=[]
+                redacted_fields=[],
+                source="openai"
             )
     
     async def _process_query_rule_based(self, query: str) -> QueryResult:

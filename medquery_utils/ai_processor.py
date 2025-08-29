@@ -43,6 +43,7 @@ class QueryResult:
     message: str
     access_level: UserRole
     redacted_fields: List[str] = None
+    source: str | None = None
 
 
 class AIProcessor:
@@ -143,7 +144,8 @@ class AIProcessor:
                 success=True,
                 message=validated_response,
                 access_level=user.role,
-                redacted_fields=access_control.permissions[user.role]['redacted_fields']
+                redacted_fields=access_control.permissions[user.role]['redacted_fields'],
+                source=("openai" if self.config.provider == "openai" else "ollama")
             )
             
         except paig_client.exception.AccessControlException as e:
@@ -152,7 +154,8 @@ class AIProcessor:
                 success=False,
                 message=f"Access denied by Trust3 security policy: {str(e)}",
                 access_level=user.role,
-                redacted_fields=[]
+                redacted_fields=[],
+                source=("openai" if self.config.provider == "openai" else "ollama")
             )
         except Exception as e:
             error_message = f"Local AI temporarily unavailable. Error: {str(e)}"
@@ -160,7 +163,8 @@ class AIProcessor:
                 success=False,
                 message=error_message,
                 access_level=user.role,
-                redacted_fields=[]
+                redacted_fields=[],
+                source=("openai" if self.config.provider == "openai" else "ollama")
             )
     
     def _format_patient_for_prompt(self, patient: Dict[str, Any], include_identifiers: bool) -> str:
