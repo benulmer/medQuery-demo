@@ -345,41 +345,30 @@ Respond directly and professionally with the requested information based on your
     def initialize_from_env() -> Optional['AIProcessor']:
         """Initialize AI processor from environment variables"""
         
-        # Respect explicit override to use Ollama only
-        if os.getenv('FORCE_OLLAMA', 'false').lower() == 'true' or os.getenv('USE_OLLAMA', 'false').lower() == 'true' or os.getenv('DISABLE_OPENAI', 'false').lower() == 'true':
-            openai_key = None
-        else:
-            openai_key = os.getenv('OPENAI_API_KEY')
+        # Enforce OpenAI-only per app preference; do not fallback to Ollama
+        if os.getenv('FORCE_OLLAMA', 'false').lower() == 'true' or os.getenv('USE_OLLAMA', 'false').lower() == 'true':
+            print("⚠️  Ollama-only mode requested by env, but this app enforces OpenAI-only. Ignoring.")
+        if os.getenv('DISABLE_OPENAI', 'false').lower() == 'true':
+            print("⚠️  DISABLE_OPENAI=true set; OpenAI is required. Returning None.")
+            return None
 
-        # Prefer OpenAI only if explicitly enabled and key present
-        if openai_key:
-            config = AIConfig(
-                provider='openai',
-                api_key=openai_key,
-                model=os.getenv('OPENAI_MODEL', 'gpt-4'),
-                max_tokens=int(os.getenv('OPENAI_MAX_TOKENS', '1000')),
-                temperature=float(os.getenv('OPENAI_TEMPERATURE', '0.1')),
-                use_trust3=os.getenv('USE_TRUST3', 'true').lower() == 'true',
-                openai_base_url=os.getenv('OPENAI_BASE_URL')
-            )
-            try:
-                return AIProcessor(config)
-            except Exception as e:
-                print(f"⚠️  OpenAI setup failed: {e}")
-                print("💡  Falling back to Ollama...")
-        
-        # Fallback to Ollama if OpenAI not available or failed
+        openai_key = os.getenv('OPENAI_API_KEY')
+        if not openai_key:
+            # Signal to caller that OpenAI is not configured
+            return None
+
         config = AIConfig(
-            model=os.getenv('OLLAMA_MODEL', 'llama2:7b-chat'),
-            max_tokens=int(os.getenv('OLLAMA_MAX_TOKENS', '1000')),
-            temperature=float(os.getenv('OLLAMA_TEMPERATURE', '0.1')),
-            ollama_url=os.getenv('OLLAMA_URL', 'http://localhost:11434'),
-            use_trust3=os.getenv('USE_TRUST3', 'true').lower() == 'true'
+            provider='openai',
+            api_key=openai_key,
+            model=os.getenv('OPENAI_MODEL', 'gpt-4'),
+            max_tokens=int(os.getenv('OPENAI_MAX_TOKENS', '1000')),
+            temperature=float(os.getenv('OPENAI_TEMPERATURE', '0.1')),
+            use_trust3=os.getenv('USE_TRUST3', 'true').lower() == 'true',
+            openai_base_url=os.getenv('OPENAI_BASE_URL')
         )
-        
         try:
             return AIProcessor(config)
         except Exception as e:
-            print(f"⚠️  Ollama setup failed: {e}")
-            print("💡  Make sure Ollama is running: ollama serve")
+            print(f"⚠️  OpenAI setup failed: {e}")
+            # Do not fallback; caller should present a clear message
             return None
