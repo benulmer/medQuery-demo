@@ -45,7 +45,50 @@ class MedQueryAgent:
             print("📋 Rule-Based Mode: Ollama not available")
     
     async def process_query(self, query: str) -> QueryResult:
-        """Always process via AI (OpenAI GPT-4 when configured)."""
+        """Process via remote MCP first (if available); fall back to OpenAI GPT-4."""
+        # 1) Try MCP tool if bridge is available
+        if self.fastmcp is not None:
+            try:
+                res = await self.fastmcp.call_tool('query_iq_service', {'query': query})
+                # Best-effort extraction of text
+                text: str = ""
+                try:
+                    # If object with structuredContent
+                    sc = getattr(res, 'structuredContent', None)
+                    if isinstance(sc, dict):
+                        text = sc.get('raw') or ""
+                    if not text:
+                        content_list = getattr(res, 'content', None)
+                        if isinstance(content_list, list) and content_list:
+                            parts = []
+                            for item in content_list:
+                                item_text = getattr(item, 'text', None)
+                                if isinstance(item_text, str):
+                                    parts.append(item_text)
+                            if parts:
+                                text = "\n".join(parts)
+                    if not text and isinstance(res, dict):
+                        text = (
+                            res.get('structuredContent', {}).get('raw')
+                            or res.get('text')
+                            or res.get('message')
+                            or ""
+                        )
+                except Exception:
+                    pass
+                if not text:
+                    text = str(res)
+                return QueryResult(
+                    success=True,
+                    message=text,
+                    access_level=self.context.user.role,
+                    redacted_fields=[]
+                )
+            except Exception:
+                # Ignore MCP errors and fall back to AI
+                pass
+
+        # 2) Fallback: OpenAI path (preferred) or error if unavailable
         try:
             if self.use_ai and self.ai_processor:
                 return await self.ai_processor.process_query(query, self.context.user, self.context.patients)
