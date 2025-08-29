@@ -293,10 +293,25 @@ class MedQueryApp {
             }
         }
 
-        const sqlSection = (metadata.sql && metadata.sql.length > 0) ? `
+        // Extract SQL block from text if present and not already provided via metadata
+        let displayedText = text;
+        let sqlFromText = null;
+        try {
+            const match = text.match(/```sql[\s\S]*?```/i);
+            if (match && match[0]) {
+                sqlFromText = match[0].replace(/```sql\s*|```/gi, '').trim();
+                displayedText = text.replace(match[0], '').trim();
+            }
+        } catch (e) {
+            // ignore parsing errors
+        }
+
+        const sqlContent = (metadata.sql && metadata.sql.length > 0) ? metadata.sql : (sqlFromText || '');
+
+        const sqlSection = (sqlContent && sqlContent.length > 0) ? `
             <div class="sql-toggle">
                 <button class="toggle-sql-btn">Show SQL</button>
-                <pre class="sql-block" style="display:none;">${metadata.sql}</pre>
+                <pre class="sql-block" style="display:none;">${sqlContent}</pre>
             </div>
         ` : '';
 
@@ -305,7 +320,7 @@ class MedQueryApp {
         messageDiv.innerHTML = `
             <div class="message-content">
                 ${headerContent}
-                <div class="message-text">${this.formatMessage(text)}</div>
+                <div class="message-text">${this.formatMessage(displayedText)}</div>
                 ${sqlSection}
                 ${footerContent}
                 <div class="message-meta">${sourceBadge}</div>
